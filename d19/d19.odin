@@ -9,7 +9,8 @@ import "core:container/priority_queue"
 import "base:runtime"
 
 Mapping :: struct {
-  from, to: string
+  from: u8,
+  to: string
 }
 
 create_replaced :: proc(
@@ -25,7 +26,7 @@ create_replaced :: proc(
   strings.builder_init(&builder)
   strings.write_string(&builder, base[:loc])
   strings.write_string(&builder, to)
-  strings.write_string(&builder, base[loc+len(from):])
+  strings.write_string(&builder, base[loc+1:])
 
   return strings.to_string(builder)
 }
@@ -39,11 +40,9 @@ generate_neighbours :: proc(
   // Consider replacments in each location.
   for mapping in mappings {
     from := mapping.from
-  //for i in 0..<len(base_molecule) {
     for i in start..<min(end, len(base_molecule)) {
-      // Is the replacement string here?
-      if i < len(base_molecule) - len(from) + 1 &&
-        slice.cmp(base_molecule[i:i+len(from)], from) == slice.Ordering.Equal {
+      if i < len(base_molecule) &&
+        base_molecule[i] == from {
 
         s := create_replaced(base_molecule, mapping, i)
         append(molecules, s)
@@ -99,7 +98,6 @@ p2_solve :: proc(start, target: string, mappings: []Mapping) -> int {
     if s.current == target do return s.num_steps
 
     if s.priority > best_priority {
-      fmt.println(s)
       best_priority = s.priority
     }
 
@@ -110,10 +108,13 @@ p2_solve :: proc(start, target: string, mappings: []Mapping) -> int {
       mappings,
       &neighbours,
       max(0, s.prefix_len - 2),
-      s.prefix_len + 18 )
+      s.prefix_len + 1)
 
     for n in neighbours {
-      if len(n) > s.prefix_len + 18 do continue
+      if len(n) > s.prefix_len + 11 {
+        delete(n)
+        continue
+      }
 
       _, inserted, err := avl.find_or_insert(&done, n)
       assert(err == runtime.Allocator_Error.None)
@@ -134,6 +135,46 @@ p2_solve :: proc(start, target: string, mappings: []Mapping) -> int {
 
 main :: proc() {
 
+  atom_labels := make(map[string](u8))
+  defer delete(atom_labels)
+  atom_labels["Al"] = 'a'
+  atom_labels["Th"] = 'b'
+  atom_labels["F"] = 'c'
+  atom_labels["Rn"] = 'd'
+  atom_labels["Ar"] = 'e'
+  atom_labels["B"] = 'f'
+  atom_labels["Ti"] = 'g'
+  atom_labels["Ca"] = 'h'
+  atom_labels["P"] = 'i'
+  atom_labels["Si"] = 'j'
+  atom_labels["Y"] = 'k'
+  atom_labels["Mg"] = 'l'
+  atom_labels["C"] = 'm'
+  atom_labels["H"] = 'n'
+  atom_labels["N"] = 'o'
+  atom_labels["O"] = 'p'
+  atom_labels["e"] = 'q'
+
+  relabel := proc(label_map: map[string](u8), s: string) -> string {
+    builder := strings.Builder{}
+    strings.builder_init(&builder)
+
+    for i := 0; i < len(s); {
+      word, ok := strings.substring(s, i, i + 2)
+      if ok && word in label_map {
+        strings.write_byte(&builder, label_map[word])
+        i += 2
+      }
+      else {
+        word, ok = strings.substring(s, i, i + 1)
+        strings.write_byte(&builder, label_map[word])
+        i += 1
+      }
+    }
+
+    return strings.to_string(builder)
+  }
+
   data := os.read_entire_file("input.txt") or_else os.exit(1)
 
   s := string(data)
@@ -146,8 +187,10 @@ main :: proc() {
     if len(row) == 0 do continue
 
     tokens := strings.split(row, " ")
-    if len(tokens) == 1 do molecule = tokens[0]
-    else do append(&mappings, Mapping { tokens[0], tokens[2] })
+    if len(tokens) == 1 do molecule = relabel(atom_labels, tokens[0])
+    else do append(
+      &mappings,
+      Mapping { relabel(atom_labels, tokens[0])[0], relabel(atom_labels, tokens[2]) })
   }
 
   assert(molecule != nil)
@@ -169,6 +212,8 @@ main :: proc() {
 
   // Strategy for P2.
   // A* mate
-  p2 := p2_solve("e", molecule.?, mappings[:])
+  start_bytes := []u8 { atom_labels["e"] }
+
+  p2 := p2_solve(cast(string)start_bytes, molecule.?, mappings[:])
   fmt.println("P2:", p2)
 }
