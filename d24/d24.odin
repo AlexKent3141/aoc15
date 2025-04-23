@@ -152,6 +152,6 @@ main :: proc() {
     append(&vals, strconv.atoi(row))
   }
 
-  fmt.println("P1:", find_min_quantum_score(vals[:], math.sum(vals[:]) / 3), ", ",
+  fmt.println("P1:", find_min_quantum_score(vals[:], math.sum(vals[:]) / 3),
               "P2:", find_min_quantum_score(vals[:], math.sum(vals[:]) / 4))
 }

@@ -16,17 +16,19 @@ main :: proc() {
   s := string(data)
 
   p1 := strings.count(s, "(") - strings.count(s, ")")
-  fmt.println("P1:", p1)
 
   // Find index when we go to the basement.
+  p2: int
   level := 0
   for i in 0..<len(s) {
     if s[i] == '(' do level += 1
     else do level -= 1
 
     if level < 0 {
-      fmt.println("P2:", i + 1)
+      p2 = i + 1
       break
     }
   }
+
+  fmt.println("P1:", p1, "P2:", p2)
 }

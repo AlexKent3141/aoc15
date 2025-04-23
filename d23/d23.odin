@@ -121,7 +121,7 @@ main :: proc() {
     step(&computer, instructions[:])
   }
 
-  fmt.println("P1:", computer.registers[1])
+  p1 := computer.registers[1]
   
   computer = Computer{}
   computer.registers[0] = 1
@@ -129,5 +129,7 @@ main :: proc() {
     step(&computer, instructions[:])
   }
 
-  fmt.println("P2:", computer.registers[1])
+  p2 := computer.registers[1]
+
+  fmt.println("P1:", p1, "P2:", p2)
 }

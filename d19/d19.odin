@@ -195,6 +195,8 @@ main :: proc() {
 
   assert(molecule != nil)
 
+  p1: int
+
   {
     neighbours := make([dynamic]string)
     defer delete(neighbours)
@@ -207,7 +209,7 @@ main :: proc() {
 
     for n in neighbours do avl.find_or_insert(&options, n)
 
-    fmt.println("P1:", avl.len(&options))
+    p1 = avl.len(&options)
   }
 
   // Strategy for P2.
@@ -215,5 +217,5 @@ main :: proc() {
   start_bytes := []u8 { atom_labels["e"] }
 
   p2 := p2_solve(cast(string)start_bytes, molecule.?, mappings[:])
-  fmt.println("P2:", p2)
+  fmt.println("P1:", p1, "P2:", p2)
 }

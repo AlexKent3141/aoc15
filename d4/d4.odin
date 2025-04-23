@@ -20,6 +20,7 @@ main :: proc() {
   buf: [100]u8
   suffix := -1
   p1: Maybe(int) = nil
+  p2: int
   for {
     suffix += 1
     entries := []string { start[0:len(start)-1], strconv.itoa(buf[:], suffix) }
@@ -32,15 +33,16 @@ main :: proc() {
     // Break it down into the first 2 bytes + the remaining high part of the next byte.
     if slice.all_of(h[:2], 0) && h[2] >> 4 == 0 {
       if p1 == nil {
-        fmt.println("P1:", suffix)
         p1 = suffix
       }
 
       // Check the next nibble for P2.
       if h[2] & 0xF == 0 {
-        fmt.println("P2:", suffix)
+        p2 = suffix
         break
       }
     }
   }
+
+  fmt.println("P1:", p1, "P2:", p2)
 }
