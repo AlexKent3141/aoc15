@@ -40,7 +40,7 @@ is_nice :: proc(s: string, criteria: NaughtySet) -> bool {
       pair_str := string(s[i:i+2])
       if strings.contains(s[i+2:], pair_str) do unoverlapping_dupe_count += 1
     }
-    if i < len(s) - 2 do dupe_with_space_count += c == s[i + 2]
+    if i < len(s) - 2 do dupe_with_space_count += cast(int)(c == s[i + 2])
   }
 
   vowels_satisfied := vowel_count >= 3 || !(Naughty.AtLeast3Vowels in criteria)

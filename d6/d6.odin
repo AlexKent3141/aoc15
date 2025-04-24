@@ -68,7 +68,7 @@ main :: proc() {
   total2 := 0
   for y in 0..<HEIGHT {
     for x in 0..<WIDTH {
-      total1 += lights_p1[WIDTH * y + x] == 1
+      total1 += cast(int)(lights_p1[WIDTH * y + x] == 1)
       total2 += lights_p2[WIDTH * y + x]
     }
   }
