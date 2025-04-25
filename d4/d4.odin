@@ -2,6 +2,7 @@ package d4
 
 import "core:os"
 import "core:fmt"
+import "core:mem"
 import "core:slice"
 import "core:strconv"
 import "core:strings"
@@ -9,22 +10,31 @@ import "core:crypto/hash"
 
 main :: proc() {
 
-  data := os.read_entire_file("input.txt") or_else os.exit(1)
-  defer delete(data)
+  backing := make([]u8, 1000000)
+  defer delete(backing)
+
+  a: mem.Arena
+  mem.arena_init(&a, backing)
+
+  alloc := mem.arena_allocator(&a)
+
+  data := os.read_entire_file("input.txt", allocator = alloc) or_else os.exit(1)
 
   start := string(data)
 
-  digest := make([]byte, hash.DIGEST_SIZES[hash.Algorithm.Insecure_MD5])
-  defer delete(digest)
+  digest := make([]byte, hash.DIGEST_SIZES[hash.Algorithm.Insecure_MD5], allocator = alloc)
 
   buf: [100]u8
   suffix := -1
   p1: Maybe(int) = nil
   p2: int
   for {
+    arena_temp := mem.begin_arena_temp_memory(&a)
+    defer mem.end_arena_temp_memory(arena_temp)
+
     suffix += 1
     entries := []string { start[0:len(start)-1], strconv.itoa(buf[:], suffix) }
-    next := strings.concatenate(entries)
+    next := strings.concatenate(entries, allocator = alloc)
 
     h := hash.hash(hash.Algorithm.Insecure_MD5, next, digest)
 
