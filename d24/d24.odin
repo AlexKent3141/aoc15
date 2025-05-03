@@ -82,10 +82,10 @@ vals_after_removing_combination :: proc(it: Combination_Iterator($T)) -> []int {
   return remaining[:]
 }
 
-can_fully_partition :: proc(vals: []int, target: int) -> bool {
+can_fully_partition :: proc(vals: []int, target, start: int) -> bool {
   if math.sum(vals[:]) == target do return true
 
-  for n := 1; n < len(vals); n += 1 {
+  for n := start; n <= len(vals) / 2; n += 1 {
     it := make_combination_iterator(vals[:], n)
     defer delete_combination_iterator(&it)
 
@@ -97,7 +97,7 @@ can_fully_partition :: proc(vals: []int, target: int) -> bool {
         remaining := vals_after_removing_combination(it)
         defer delete(remaining)
 
-        if can_fully_partition(remaining[:], target) do return true
+        if can_fully_partition(remaining[:], target, n) do return true
       }
 
       c, ok = combinate(&it)
@@ -122,7 +122,7 @@ find_min_quantum_score :: proc(vals: []int, target: int) -> int {
         remaining := vals_after_removing_combination(it)
         defer delete(remaining)
 
-        if can_fully_partition(remaining[:], target) {
+        if can_fully_partition(remaining[:], target, smallest) {
           score := math.prod(c[:])
           if score < best_quantum_score {
             best_quantum_score = score
