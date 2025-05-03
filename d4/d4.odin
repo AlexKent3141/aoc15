@@ -1,6 +1,7 @@
 package d4
 
 import "core:crypto/hash"
+import "core:mem"
 import "core:fmt"
 import "core:os"
 import "core:slice"
@@ -43,13 +44,23 @@ main :: proc() {
 
     task_proc := proc(data: ^Thread_Data) {
       buf := [100]u8{}
-      digest := make([]byte, hash.DIGEST_SIZES[hash.Algorithm.Insecure_MD5])
-      defer delete(digest)
 
+      // Setup arena allocator.
+      backing := make([]u8, 1000)
+      defer delete(backing)
+
+      a: mem.Arena
+      mem.arena_init(&a, backing)
+
+      alloc := mem.arena_allocator(&a)
+
+      digest := make([]byte, hash.DIGEST_SIZES[hash.Algorithm.Insecure_MD5], allocator = alloc)
       for suffix in data^.start_suffix..<data^.start_suffix + PER_TASK {
+        temp_block := mem.begin_arena_temp_memory(&a)
+        defer mem.end_arena_temp_memory(temp_block)
+
         entries := []string { data^.prefix, strconv.itoa(buf[:], suffix) }
-        next := strings.concatenate(entries)
-        defer delete(next)
+        next := strings.concatenate(entries, allocator = alloc)
         h := hash.hash(hash.Algorithm.Insecure_MD5, next, digest)
 
         // Check the prefix.
