@@ -46,15 +46,15 @@ look_and_say :: proc(groups: [dynamic]Group, next: ^[dynamic]Group) {
   for g in groups {
     if prev == nil || g.multiplier == prev do mul += 1
     else {
-      append(next, Group { multiplier = mul, val = prev.? })
+      #force_inline append(next, Group { multiplier = mul, val = prev.? })
       mul = 1
     }
 
     prev = g.multiplier
 
-    if prev == nil || g.val == prev do mul += 1
+    if g.val == prev do mul += 1
     else {
-      append(next, Group { multiplier = mul, val = prev.? })
+      #force_inline append(next, Group { multiplier = mul, val = prev.? })
       mul = 1
     }
 
