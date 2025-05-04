@@ -18,12 +18,13 @@ create_replaced :: proc(
   mapping: Mapping,
   loc: int) -> string {
 
-  from := mapping.from
   to := mapping.to
 
   // Create the replaced string.
   builder := strings.Builder{}
   strings.builder_init(&builder)
+  strings.builder_grow(&builder, len(base) - 1 + len(to))
+
   strings.write_string(&builder, base[:loc])
   strings.write_string(&builder, to)
   strings.write_string(&builder, base[loc+1:])
