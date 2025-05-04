@@ -27,7 +27,17 @@ main :: proc() {
 
   second_code := proc(start, mul, mod, power: int) -> int {
     current := start
-    for _ in 1..<power {
+
+    num_iterations := power - 1
+
+    // For performance, avoid some modulo operations by doing two multiplications on each
+    // iteration before reducing.
+    for _ in 0..<num_iterations / 2 {
+      current *= (mul * mul)
+      current %= mod
+    }
+
+    if (num_iterations & 1) == 1 {
       current *= mul
       current %= mod
     }
