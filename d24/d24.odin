@@ -50,7 +50,8 @@ combinate :: proc(it: ^Combination_Iterator($T)) -> (c: []T, ok: bool) {
   }
 
   // Generate the next combination.
-  for i := it.m - 1; i >= 0; i -= 1 {
+  // This is performance critical so going to disable bounds checking locally.
+  #no_bounds_check for i := it.m - 1; i >= 0; i -= 1 {
     if it.index[i] < len(it.elements) - (it.m - i) {
       it.index[i] += 1
       it.current[i] = it.elements[it.index[i]]
