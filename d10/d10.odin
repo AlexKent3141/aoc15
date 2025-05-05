@@ -43,7 +43,7 @@ groups_len :: proc(groups: []Group) -> int {
 look_and_say :: proc(groups: [dynamic]Group, next: ^[dynamic]Group) {
   mul := 0
   prev: Maybe(int)
-  for g in groups {
+  for &g in groups {
     if prev == nil || g.multiplier == prev do mul += 1
     else {
       #force_inline append(next, Group { multiplier = mul, val = prev.? })
